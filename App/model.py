@@ -39,12 +39,46 @@ los mismos.
 
 # Construccion de modelos
 
+def initCatalog():
+    catalog = {
+        "artists": None,
+        "artworks": None,
+        "mediums": None}
+
+    catalog["mediums"] = mp.newMap(100,111,"PROBING",loadfactor=0.5)
+    return catalog
+
 # Funciones para agregar informacion al catalogo
+def loadArtists(catalog, filename):
+    catalog["artists"] = lt.newList('ARRAY_LIST', filename=filename)
+    return catalog
+
+def loadArtworks(catalog, filename):
+    catalog["artworks"] = lt.newList('ARRAY_LIST', filename=filename)
+    return catalog
 
 # Funciones para creacion de datos
+def addArtist(catalog, artist):
+    lt.addLast(catalog["artists"], artist)
+
+def addArtwork(catalog, artwork):
+    lt.addLast(catalog["artworks"], artwork)
+    mp.put(catalog["mediums"], artwork["Medium"], artwork)
 
 # Funciones de consulta
+
+def olderArtworksbyMedium(catalog,medium,x):
+    olderones = lt.newList("ARRAY_LIST")
+    for artwork in lt.iterator(catalog["artworks"]):
+        if artwork["Medium"] == medium:
+            lt.addLast(olderones,artwork)
+
+    sa.sort(olderones,compareYears)
+    older = lt.subList(catalog["artists"],-x,x)
+    return older
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 # Funciones de ordenamiento
+def compareYears(year1, year2):
+    return (year1 < year2)
