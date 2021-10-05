@@ -74,10 +74,15 @@ while True:
         print("Cargando información de los archivos ....")
         catalog = initCatalog()
         loadData(catalog)
-        print(catalog)
+        print(catalog["artists"])
 
     elif int(inputs[0]) == 2:
-        olderArtworksbyMedium(catalog)
+        if catalog != None:
+            olderArtworksbyMedium(catalog)
+            input("Presione enter para continuar...")
+        else:
+            print("Se deben cargar los datos primero")
+            input("Presione enter para continuar...")
 
     else:
         sys.exit(0)

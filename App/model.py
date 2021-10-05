@@ -45,7 +45,8 @@ def initCatalog():
         "artworks": None,
         "mediums": None}
 
-    catalog["mediums"] = mp.newMap(100,111,"PROBING",loadfactor=0.5)
+    catalog["mediums"] = mp.newMap(maptype="PROBING",loadfactor=0.5)
+    catalog["nationality"] = mp.newMap(maptype="PROBING",loadfactor=0.5)
     return catalog
 
 # Funciones para agregar informacion al catalogo
@@ -63,22 +64,34 @@ def addArtist(catalog, artist):
 
 def addArtwork(catalog, artwork):
     lt.addLast(catalog["artworks"], artwork)
-    mp.put(catalog["mediums"], artwork["Medium"], artwork)
+    addArtworkMedium(catalog,artwork)
+    mp.put(catalog["nationality"], artwork["Nationality"], artwork)
 
+def addArtworkMedium(catalog,artwork):
+    mediums = catalog['mediums']
+    medium = artwork["Medium"]
+    existmedium = mp.contains(mediums, medium)
+    if existmedium:
+        entry = mp.get(mediums, medium)
+        medio = me.getValue(entry)
+    else:
+        medio = newMedium(medium)
+        mp.put(mediums, medium, artwork)
+    lt.addLast(mediums['mediums'], artwork)
+
+def newMedium(medium):
+    entry = {"medium":"", "artworks": ""}
+    entry["medium"] = medium
+    entry["artworks"] = lt.newList('SINGLE_LINKED', compareYears)
+    return entry 
 # Funciones de consulta
 
 def olderArtworksbyMedium(catalog,medium,x):
-    olderones = lt.newList("ARRAY_LIST")
-    for artwork in lt.iterator(catalog["artworks"]):
-        if artwork["Medium"] == medium:
-            lt.addLast(olderones,artwork)
-
-    sa.sort(olderones,compareYears)
-    older = lt.subList(catalog["artists"],-x,x)
+    older = mp.get(catalog["mediums"],medium)
     return older
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 # Funciones de ordenamiento
 def compareYears(year1, year2):
-    return (year1 < year2)
+    return (year1["Date"] < year2["Date"])
