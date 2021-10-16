@@ -39,68 +39,80 @@ los mismos.
 
 # Construccion de modelos
 
-def initCatalog():
-    catalog = {
-        "artists": None,
-        "artworks": None,
-        "mediums": None}
+def newCatalog():
+  catalog = {
+    'artists': None,
+    'artistsIds': None,
+    'artworks': None,
+    'artworksIds': None,
+  }
+  
+  catalog['artists'] = lt.newList('ARRAY_LIST')
 
-    catalog["mediums"] = mp.newMap(maptype="PROBING",loadfactor=0.5)
-    catalog["nationality"] = mp.newMap(maptype="PROBING",loadfactor=0.5)
-    return catalog
+  catalog['artistsIds'] = mp.newMap(15500, maptype='CHAINING', loadfactor=1.5)
 
-# Funciones para agregar informacion al catalogo
+  catalog['artworks'] = lt.newList('ARRAY_LIST')
 
+  catalog['artworksIds'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
 
-def loadArtists(catalog, filename):
-    catalog["artists"] = lt.newList('ARRAY_LIST', filename=filename)
-    return catalog
+  catalog['artistsByYear'] = mp.newMap(15500, maptype='CHAINING', loadfactor=1.5)
 
-def loadArtworks(catalog, filename):
-    catalog["artworks"] = lt.newList('ARRAY_LIST', filename=filename)
-    return catalog
+  return catalog
 
-
-# Funciones para creacion de datos
-
+# Añadir informacion al catalogo
 
 def addArtist(catalog, artist):
-    lt.addLast(catalog["artists"], artist)
+  lt.addLast(catalog['artists'], artist)
+  mp.put(catalog['artistsIds'], artist['ConstituentID'], artist)
+
+  existingYear = mp.contains(catalog['artistsByYear'], artist['BeginDate'])
+
+  if existingYear:
+    entry = mp.get(catalog['artistsByYear'], artist['BeginDate'])
+    year = me.getValue(entry)
+    lt.addLast(year['artists'], artist)
+  else:
+    year = newYear(artist['BeginDate'])
+    lt.addLast(year['artists'], artist)
+    mp.put(catalog['artistsByYear'], artist['BeginDate'], year)
 
 
 def addArtwork(catalog, artwork):
-    lt.addLast(catalog["artworks"], artwork)
-    addArtworkMedium(catalog,artwork)
-    mp.put(catalog["nationality"], artwork["Nationality"], artwork)
+  lt.addLast(catalog['artworks'], artwork)
+  mp.put(catalog['artworksIds'], artwork['ObjectID'], artwork)
 
+# Funciones para creacion de datos
 
-def addArtworkMedium(catalog,artwork):
-    mediums = catalog['mediums']
-    medium = artwork["Medium"]
-    existmedium = mp.contains(mediums, medium)
-    if existmedium:
-        entry = mp.get(mediums, medium)
-        medio = me.getValue(entry)
-    else:
-        medio = newMedium(medium)
-        mp.put(mediums, medium, artwork)
-    lt.addLast(mediums['mediums'], artwork)
+def newYear(year):
+  year = {
+    'year': year,
+    'artists': None
+  }
 
+  year['artists'] = lt.newList('ARRAY_LIST')
 
-def newMedium(medium):
-    entry = {"medium":"", "artworks": ""}
-    entry["medium"] = medium
-    entry["artworks"] = lt.newList('SINGLE_LINKED', compareYears)
-    return entry 
-
+  return year
 
 # Funciones de consulta
 
+def artistsBeetweenYears(catalog, begin, end):
+  artists = lt.newList('ARRAY_LIST')
 
-def olderArtworksbyMedium(catalog,medium,x):
-    older = mp.get(catalog["mediums"],medium)
-    return older
+  currentYear = int(begin)
 
+  artistsByYear = catalog['artistsByYear']
+
+  while currentYear <= int(end):
+    entry = mp.get(artistsByYear, str(currentYear))
+
+    if entry:
+      value = me.getValue(entry)
+      for artist in lt.iterator(value['artists']):
+        lt.addLast(artists, artist)
+    
+    currentYear += 1
+
+  return artists
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
@@ -108,7 +120,4 @@ def olderArtworksbyMedium(catalog,medium,x):
 
 # Funciones de ordenamiento
 
-
-def compareYears(year1, year2):
-    return (year1["Date"] < year2["Date"])
 

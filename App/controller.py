@@ -33,22 +33,25 @@ El controlador se encarga de mediar entre la vista y el modelo.
 
 
 def initCatalog():
-  catalog = model.initCatalog()
-  return catalog
+  return model.newCatalog()
 
 
 # Funciones para la carga de datos
 
+def loadData(catalog, artistsFile, artworksFile):
+  artistsFileF = cf.data_dir + artistsFile
+  artworksFileF = cf.data_dir + artworksFile
 
-def loadData(catalog, artistFilename, artworksFilename):
-  artistFile = cf.data_dir + artistFilename
-  artworksFile = cf.data_dir + artworksFilename
-  
-  catalog = model.loadArtists(catalog, artistFile)
-  catalog = model.loadArtworks(catalog, artworksFile)
-  
-  return catalog 
+  inputArtist = csv.DictReader(open(artistsFileF, encoding='utf-8'))
+  inputArtworks = csv.DictReader(open(artworksFileF, encoding='utf-8'))
 
+  for artist in inputArtist:
+    model.addArtist(catalog, artist)
+
+  for artwork in inputArtworks:
+    model.addArtwork(catalog, artwork)
+
+  return catalog
 
 # Funciones de ordenamiento
 
@@ -56,7 +59,6 @@ def loadData(catalog, artistFilename, artworksFilename):
 
 # Funciones de consulta sobre el catálogo
 
-
-def olderArtworksbyMedium(catalog,medium,x):
-  return model.olderArtworksbyMedium(catalog,medium,x)
-
+def getSortedArtistsBetweenYears(catalog, beginDate, endDate):
+  artistList = model.artistsBeetweenYears(catalog, beginDate, endDate)
+  return artistList
