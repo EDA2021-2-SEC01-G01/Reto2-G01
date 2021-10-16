@@ -31,12 +31,15 @@ El controlador se encarga de mediar entre la vista y el modelo.
 
 # Inicialización del Catálogo
 
-def initCatalog():
 
-    catalog = model.initCatalog()
-    return catalog
+def initCatalog():
+  catalog = model.initCatalog()
+  return catalog
+
 
 # Funciones para la carga de datos
+
+
 def loadData(catalog, artistFilename, artworksFilename):
   artistFile = cf.data_dir + artistFilename
   artworksFile = cf.data_dir + artworksFilename
@@ -46,8 +49,14 @@ def loadData(catalog, artistFilename, artworksFilename):
   
   return catalog 
 
+
 # Funciones de ordenamiento
 
+
+
 # Funciones de consulta sobre el catálogo
+
+
 def olderArtworksbyMedium(catalog,medium,x):
-    return model.olderArtworksbyMedium(catalog,medium,x)
+  return model.olderArtworksbyMedium(catalog,medium,x)
+

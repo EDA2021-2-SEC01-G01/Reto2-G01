@@ -50,6 +50,8 @@ def initCatalog():
     return catalog
 
 # Funciones para agregar informacion al catalogo
+
+
 def loadArtists(catalog, filename):
     catalog["artists"] = lt.newList('ARRAY_LIST', filename=filename)
     return catalog
@@ -58,14 +60,19 @@ def loadArtworks(catalog, filename):
     catalog["artworks"] = lt.newList('ARRAY_LIST', filename=filename)
     return catalog
 
+
 # Funciones para creacion de datos
+
+
 def addArtist(catalog, artist):
     lt.addLast(catalog["artists"], artist)
+
 
 def addArtwork(catalog, artwork):
     lt.addLast(catalog["artworks"], artwork)
     addArtworkMedium(catalog,artwork)
     mp.put(catalog["nationality"], artwork["Nationality"], artwork)
+
 
 def addArtworkMedium(catalog,artwork):
     mediums = catalog['mediums']
@@ -79,19 +86,29 @@ def addArtworkMedium(catalog,artwork):
         mp.put(mediums, medium, artwork)
     lt.addLast(mediums['mediums'], artwork)
 
+
 def newMedium(medium):
     entry = {"medium":"", "artworks": ""}
     entry["medium"] = medium
     entry["artworks"] = lt.newList('SINGLE_LINKED', compareYears)
     return entry 
+
+
 # Funciones de consulta
+
 
 def olderArtworksbyMedium(catalog,medium,x):
     older = mp.get(catalog["mediums"],medium)
     return older
 
+
 # Funciones utilizadas para comparar elementos dentro de una lista
 
+
+
 # Funciones de ordenamiento
+
+
 def compareYears(year1, year2):
     return (year1["Date"] < year2["Date"])
+
