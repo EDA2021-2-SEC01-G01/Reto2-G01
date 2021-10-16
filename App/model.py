@@ -24,7 +24,6 @@
  * Dario Correal - Version inicial
  """
 
-
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
@@ -107,6 +106,7 @@ def artistsBeetweenYears(catalog, begin, end):
 
     if entry:
       value = me.getValue(entry)
+      sa.sort(value['artists'], compareNames)
       for artist in lt.iterator(value['artists']):
         lt.addLast(artists, artist)
     
@@ -120,4 +120,5 @@ def artistsBeetweenYears(catalog, begin, end):
 
 # Funciones de ordenamiento
 
-
+def compareNames(artist1, artist2):
+  return artist1['DisplayName'] < artist2['DisplayName']

@@ -37,16 +37,19 @@ def initCatalog():
   """
   Inicializa el catalogo de libros
   """
-  return controller.initCatalog()
+  return controller.newCatalog()
 
 def loadData(catalog):
-  artistas = input('Ingresa el nombre del archivo de artistas: (Por defecto es el archivo de artistas pequeño)')
-  obras = input('Ingresa el nombre del archivo de obras: (Por defecto es el archivo de obras pequeño)')
+  file = input('Ingresa 1 para cargar los archivos grande: (Por defecto se utilizan los archivos de artistas y obras pequeños)')
 
-  if artistas == '':
+  if file == '':
     artistas = 'Artists-utf8-small.csv'
-
-  if obras == '':
+    obras = 'Artworks-utf8-small.csv'
+  elif file == '1':
+    artistas = 'Artists-utf8-large.csv'
+    obras = 'Artworks-utf8-large.csv'
+  else:
+    artistas = 'Artists-utf8-small.csv'
     obras = 'Artworks-utf8-small.csv'
 
   return controller.loadData(catalog, artistas, obras) 
@@ -64,7 +67,7 @@ def sortArtistsByYears(catalog):
   print('\n-----------------------------------------------------------------')
 
   print('\n There are', lt.size(artists), 'artists born between', beginYear, 'and', endYear)
-  print('\nThe first and last 3 artists in range are...')
+  print('\n The first and last 3 artists in range are...')
 
   print('\n-----------------------------------------------------------------')
 
@@ -95,7 +98,8 @@ def sortArtistsByYears(catalog):
 def printMenu():
   print("Bienvenido")
   print("1- Cargar información en el catálogo")
-  print("2- Obra mas antigua por medio")
+  print("2- Listar cronológicamente los artistas")
+  print("Otro- Salir")
 
 catalog = initCatalog()
 
