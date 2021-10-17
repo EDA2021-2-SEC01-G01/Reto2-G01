@@ -40,7 +40,7 @@ def initCatalog():
   return controller.newCatalog()
 
 def loadData(catalog):
-  file = input('Ingresa 1 para cargar los archivos grande: (Por defecto se utilizan los archivos de artistas y obras pequeños)')
+  file = input('Ingresa 1 para cargar los archivos grande: (Por defecto se utilizan los archivos de artistas y obras pequeños): ')
 
   if file == '':
     artistas = 'Artists-utf8-small.csv'
@@ -95,13 +95,60 @@ def sortArtistsByYears(catalog):
     print('\n-----------------------------------------------------------------')
 
 
+def sortArtworksByDates(catalog):
+  beginYear = input('Ingresa la fecha de incio con un formato YYYY-mm-dd (Ej: 1920-06-8): ')
+  endYear = input('Ingresa la fecha final con un formato YYYY-mm-dd (Ej: 1920-06-8): ')
+
+  artworksInfo = controller.getSortedArtworksBetweenDates(catalog, beginYear, endYear)
+  artworks = artworksInfo[0]
+
+  firstThree = lt.subList(artworks, 1, 3)
+  lastThree = lt.subList(artworks, lt.size(artworks)-3, 3)
+
+  print('\n-----------------------------------------------------------------')
+
+  print('\n There are', lt.size(artworks), 'artworks acquired between', beginYear, 'and', endYear)
+  print('\n With', artworksInfo[2], 'different artists and purchased', artworksInfo[1], 'of them.')
+  print('\n The first and last 3 artists in range are...')
+
+  print('\n-----------------------------------------------------------------')
+
+  for artwork in lt.iterator(firstThree):
+    print('\n  ObjectID:', artwork['ObjectID'])
+    print('\n  Title:', (artwork['Title'] or 'Unknown'))
+    print('\n  ArtistsNames:')
+    for artist in lt.iterator(artwork['ConstituentID']):
+      print('\n \t * ', artist)
+    print('\n  Medium:', (artwork['Medium'] or 'Unknown'))
+    print('\n  Dimensions:', (artwork['Dimensions'] or 'Unknown'))
+    print('\n  Date:', (artwork['Date'] or 'Unknown'))
+    print('\n  DateAcquired:', (artwork['DateAcquired'] or 'Unknown'))
+    print('\n  URL:', (artwork['URL'] or 'Unknown'))
+    print('\n-----------------------------------------------------------------')
+
+  print('\n-----------------------------------------------------------------')
+  for artwork in lt.iterator(lastThree):
+    print('\n  ObjectID:', artwork['ObjectID'])
+    print('\n  Title:', (artwork['Title'] or 'Unknown'))
+    print('\n  ArtistsNames:')
+    for artist in lt.iterator(artwork['ConstituentID']):
+      print('\n \t * ', artist)
+    print('\n  Medium:', (artwork['Medium'] or 'Unknown'))
+    print('\n  Dimensions:', (artwork['Dimensions'] or 'Unknown'))
+    print('\n  Date:', (artwork['Date'] or 'Unknown'))
+    print('\n  DateAcquired:', (artwork['DateAcquired'] or 'Unknown'))
+    print('\n  URL:', (artwork['URL'] or 'Unknown'))
+    print('\n-----------------------------------------------------------------')
+
+
 def printMenu():
   print("Bienvenido")
   print("1- Cargar información en el catálogo")
   print("2- Listar cronológicamente los artistas")
+  print("3- Listar cronológicamente las adquisiciones")
   print("Otro- Salir")
 
-catalog = initCatalog()
+catalog = None
 
 """
 Menu principal
@@ -111,9 +158,12 @@ while True:
   inputs = input('Seleccione una opción para continuar\n')
   if int(inputs[0]) == 1:
     print("Cargando información de los archivos ....")
+    catalog = initCatalog()
     catalog = loadData(catalog)
   elif int(inputs[0]) == 2:
     sortArtistsByYears(catalog)
+  elif int(inputs[0]) == 3:
+    sortArtworksByDates(catalog)
   else:
     sys.exit(0)
 sys.exit(0)

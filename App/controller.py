@@ -62,3 +62,8 @@ def loadData(catalog, artistsFile, artworksFile):
 def getSortedArtistsBetweenYears(catalog, beginDate, endDate):
   artistList = model.artistsBeetweenYears(catalog, beginDate, endDate)
   return artistList
+
+
+def getSortedArtworksBetweenDates(catalog, beginDate, endDate):
+  artworksInfo = model.artworksBeetweenDate(catalog, beginDate, endDate)
+  return (artworksInfo['artworks'], artworksInfo['purchased'], artworksInfo['nArtists'])

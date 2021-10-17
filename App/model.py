@@ -25,6 +25,7 @@
  """
 
 import config as cf
+from datetime import datetime as dt
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
@@ -41,28 +42,28 @@ los mismos.
 def newCatalog():
   catalog = {
     'artists': None,
-    'artistsIds': None,
+    'artists': None,
     'artworks': None,
-    'artworksIds': None,
+    'artworks': None,
   }
   
-  catalog['artists'] = lt.newList('ARRAY_LIST')
 
-  catalog['artistsIds'] = mp.newMap(15500, maptype='CHAINING', loadfactor=1.5)
+  catalog['artists'] = mp.newMap(15500, maptype='CHAINING', loadfactor=1.5)
 
-  catalog['artworks'] = lt.newList('ARRAY_LIST')
+  catalog['artworks'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
 
-  catalog['artworksIds'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
+  catalog['artworksList'] = lt.newList('ARRAY_LIST')
 
   catalog['artistsByYear'] = mp.newMap(15500, maptype='CHAINING', loadfactor=1.5)
+
+  catalog['artworksByDate'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
 
   return catalog
 
 # Añadir informacion al catalogo
 
 def addArtist(catalog, artist):
-  lt.addLast(catalog['artists'], artist)
-  mp.put(catalog['artistsIds'], artist['ConstituentID'], artist)
+  mp.put(catalog['artists'], artist['ConstituentID'], artist)
 
   existingYear = mp.contains(catalog['artistsByYear'], artist['BeginDate'])
 
@@ -77,8 +78,26 @@ def addArtist(catalog, artist):
 
 
 def addArtwork(catalog, artwork):
-  lt.addLast(catalog['artworks'], artwork)
-  mp.put(catalog['artworksIds'], artwork['ObjectID'], artwork)
+  lt.addLast(catalog['artworksList'], artwork)
+  mp.put(catalog['artworks'], artwork['ObjectID'], artwork)
+
+  if artwork['DateAcquired']:
+    dateObject = dt.strptime(artwork['DateAcquired'], '%Y-%m-%d')
+  else:
+    dateObject = 'Unknown'
+
+  dateStringCode = dateObject
+
+  existingDate = mp.contains(catalog['artworksByDate'], dateStringCode)
+
+  if existingDate:
+    entry = mp.get(catalog['artworksByDate'], dateStringCode)
+    date = me.getValue(entry)
+    lt.addLast(date['artworks'], artwork)
+  else:
+    date = newDate(dateStringCode)
+    lt.addLast(date['artworks'], artwork)
+    mp.put(catalog['artworksByDate'], dateStringCode, date)
 
 # Funciones para creacion de datos
 
@@ -91,6 +110,15 @@ def newYear(year):
   year['artists'] = lt.newList('ARRAY_LIST')
 
   return year
+
+
+def newDate(date):
+  date = {
+    'date': date,
+    'artworks': lt.newList('ARRAY_LIST')
+  }
+
+  return date
 
 # Funciones de consulta
 
@@ -114,11 +142,41 @@ def artistsBeetweenYears(catalog, begin, end):
 
   return artists
 
-# Funciones utilizadas para comparar elementos dentro de una lista
 
+def artworksBeetweenDate(catalog, begin, end):
+  artworks = lt.newList('ARRAY_LIST')
+  purchased = 0
+  nArtists = 0 
 
+  artworksByDate = catalog['artworksByDate']
+
+  keys = mp.keySet(artworksByDate)
+
+  for key in lt.iterator(keys):
+    if key != 'Unknown':
+      if dt.strptime(begin, '%Y-%m-%d') <= key and key <= dt.strptime(end, '%Y-%m-%d'):
+        entry = mp.get(artworksByDate, key)
+        value = me.getValue(entry)['artworks']
+
+        for atwork in lt.iterator(value):
+          if 'purchase' in atwork['CreditLine'].lower():
+            purchased += 1
+          artistsIds = atwork['ConstituentID'][1:-1].replace(' ', '').split(',')
+          atwork['ConstituentID'] = lt.newList('ARRAY_LIST')
+          for id in artistsIds:
+            if mp.contains(catalog['artists'], id):
+              nArtists += 1
+              lt.addLast(atwork['ConstituentID'], me.getValue(mp.get(catalog['artists'], id))['DisplayName'])
+
+          lt.addLast(artworks, atwork)
+
+  sa.sort(artworks, compareDates)
+  return {'artworks': artworks, 'purchased': purchased, 'nArtists': nArtists}
 
 # Funciones de ordenamiento
+
+def compareDates(artwork1, artwork2):
+  return dt.strptime(artwork1['DateAcquired'], '%Y-%m-%d') < dt.strptime(artwork2['DateAcquired'], '%Y-%m-%d')
 
 def compareNames(artist1, artist2):
   return artist1['DisplayName'] < artist2['DisplayName']
