@@ -54,6 +54,7 @@ def loadData(catalog):
 
   return controller.loadData(catalog, artistas, obras) 
 
+# REQ. 1
 
 def sortArtistsByYears(catalog):
   beginYear = input('Ingresa el año de incio: ')
@@ -94,6 +95,7 @@ def sortArtistsByYears(catalog):
     print('\n  ULAN:', (year['ULAN'] or 'Unknown'))
     print('\n-----------------------------------------------------------------')
 
+# REQ. 2
 
 def sortArtworksByDates(catalog):
   beginYear = input('Ingresa la fecha de incio con un formato YYYY-mm-dd (Ej: 1920-06-8): ')
@@ -140,12 +142,51 @@ def sortArtworksByDates(catalog):
     print('\n  URL:', (artwork['URL'] or 'Unknown'))
     print('\n-----------------------------------------------------------------')
 
+# REQ. 3
+
+def getMediumsAndArtworks(catalog):
+  name = input('Igrese el nombre del artista: ')
+
+  id = controller.artistId(catalog, name)
+
+  mediumsAndArtworks = controller.getArtworksFromArtist(catalog, name)
+
+  firstMedium = lt.firstElement(mediumsAndArtworks['mediums'])
+
+  artwoksToReturn = controller.getArtworksFromArtistByMediums(mediumsAndArtworks['artworks'], firstMedium['medium'])
+
+  print(name, 'with MoMA ID', id, 'has', lt.size(mediumsAndArtworks['artworks']), 'pieces in his/her name at the museum.')
+  print('There are', lt.size(mediumsAndArtworks['mediums']), 'different mediums/techniques in his/her work.')
+
+  print('\nHer/His top 5 Medium/Technique are: ')
+
+  for medium in lt.iterator(lt.subList(mediumsAndArtworks['mediums'], 1, 5)):
+    print('\nMediumName:', medium['medium'])
+    print('\nCount:', medium['count'])
+    print('\n-------------------------')
+
+  print('\n\nHis/Her most used Medium/Technique is:', firstMedium['medium'], 'with', firstMedium['count'], 'pieces.')
+  print('A sample of 3', firstMedium['medium'], 'from the collection are:')
+  print('\n--------------------------------------')
+
+  for artwork in lt.iterator(lt.subList(artwoksToReturn, 1, 3)):
+    print(' ObjectID:', artwork['ObjectID'])
+    print(' Title:', artwork['Title'])
+    print(' Medium:', artwork['Medium'])
+    print(' Date:', (artwork['Date'] or 'Unknown'))
+    print(' Dimensions:', artwork['Dimensions'])
+    print(' DateAcquired:', artwork['DateAcquired'])
+    print(' Department:', artwork['Department'])
+    print(' Classification:', artwork['Classification'])
+    print(' URL:', (artwork['URL'] or 'Unknown'))
+    print('\n-----------------------------------')
 
 def printMenu():
   print("Bienvenido")
   print("1- Cargar información en el catálogo")
   print("2- Listar cronológicamente los artistas")
   print("3- Listar cronológicamente las adquisiciones")
+  print("4- Clasificar las obras de un artista por técnica")
   print("Otro- Salir")
 
 catalog = None
@@ -164,6 +205,8 @@ while True:
     sortArtistsByYears(catalog)
   elif int(inputs[0]) == 3:
     sortArtworksByDates(catalog)
+  elif int(inputs[0]) == 4:
+    getMediumsAndArtworks(catalog)
   else:
     sys.exit(0)
 sys.exit(0)

@@ -55,7 +55,8 @@ def loadData(catalog, artistsFile, artworksFile):
 
 # Funciones de ordenamiento
 
-
+def sortMediums(artworks):
+  return model.topMediumsByArtworks(artworks)
 
 # Funciones de consulta sobre el catálogo
 
@@ -67,3 +68,21 @@ def getSortedArtistsBetweenYears(catalog, beginDate, endDate):
 def getSortedArtworksBetweenDates(catalog, beginDate, endDate):
   artworksInfo = model.artworksBeetweenDate(catalog, beginDate, endDate)
   return (artworksInfo['artworks'], artworksInfo['purchased'], artworksInfo['nArtists'])
+
+
+def getArtworksFromArtist(catalog, name):
+  id = model.artistIdByName(catalog, name)
+
+  artworks = model.artworksByArtist(catalog, id)
+
+  sortedMediums = sortMediums(artworks)
+
+  return {'artworks': artworks, 'mediums': sortedMediums}
+
+
+def artistId(catalog, name):
+  return model.artistIdByName(catalog, name)
+
+
+def getArtworksFromArtistByMediums(artworks, medium):
+  return model.getArtworksByMedium(artworks, medium)
