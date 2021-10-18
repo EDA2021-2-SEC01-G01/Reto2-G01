@@ -41,11 +41,10 @@ los mismos.
 
 def newCatalog():
   catalog = {}
-  
 
   catalog['artists'] = mp.newMap(15500, maptype='CHAINING', loadfactor=1.5)
 
-  catalog['artistsIds'] = mp.newMap(15500, maptype='PROBING', loadfactor=0.5)
+  catalog['artistsIdsByName'] = mp.newMap(15500, maptype='PROBING', loadfactor=0.5)
 
   catalog['artworks'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
 
@@ -65,7 +64,7 @@ def newCatalog():
 
 def addArtist(catalog, artist):
   mp.put(catalog['artists'], artist['ConstituentID'], artist)
-  mp.put(catalog['artistsIds'], artist['DisplayName'], artist['ConstituentID'])
+  mp.put(catalog['artistsIdsByName'], artist['DisplayName'], artist['ConstituentID'])
 
   existingYear = mp.contains(catalog['artistsByYear'], artist['BeginDate'])
 
@@ -119,8 +118,32 @@ def addArtwork(catalog, artwork):
       lt.addLast(artistValue['artworks'], artwork)
       mp.put(catalog['artworksByArtist'], artist, artistValue)
 
+  # Artorks by nationality
+
+  for id in artistsList:
+    artistEntry = mp.get(catalog['artists'], id)
+    artist = me.getValue(artistEntry)
+    existingNation = mp.contains(catalog['artworksByNationality'], artist['Nationality'] or 'Nationality unknown')
+
+    if existingNation:
+      entry = mp.get(catalog['artworksByNationality'], artist['Nationality'] or 'Nationality unknown')
+      value = me.getValue(entry)
+      lt.addLast(value['artworks'], artwork)
+    else:
+      nationValue = newNation(artist['Nationality'] or 'Nationality unknown')
+      lt.addLast(nationValue['artworks'], artwork)
+      mp.put(catalog['artworksByNationality'], artist['Nationality'] or 'Nationality unknown', nationValue)
 
 # Funciones para creacion de datos
+
+def newNation(nation):
+  nation = {
+    'nation': nation,
+    'artworks': lt.newList('ARRAY_LIST')
+  }
+
+  return nation
+
 
 def newYear(year):
   year = {
@@ -150,6 +173,9 @@ def newArtist(artist):
   return artist
 
 # Funciones de consulta
+
+def getNameFromId(catalog, id):
+  return me.getValue(mp.get(catalog['artists'], id))['DisplayName']
 
 def artistsBeetweenYears(catalog, begin, end):
   artists = lt.newList('ARRAY_LIST')
@@ -204,7 +230,7 @@ def artworksBeetweenDate(catalog, begin, end):
 
 
 def artistIdByName(catalog, name):
-  entry = mp.get(catalog['artistsIds'], name)
+  entry = mp.get(catalog['artistsIdsByName'], name)
   if not entry:
     return None
   value = me.getValue(entry)
@@ -248,6 +274,21 @@ def getArtworksByMedium(artworks, medium):
 
   return final
 
+
+def getSortedNationsByArtworks(catalog):
+  keys = mp.keySet(catalog['artworksByNationality'])
+  nations = lt.newList()
+
+  for key in lt.iterator(keys):
+    entry = mp.get(catalog['artworksByNationality'], key)
+    value = me.getValue(entry)['artworks']
+    lt.addLast(nations, {'nation': key, 'count': lt.size(value)})
+
+  sa.sort(nations, compareCount)
+
+  return {'nations': nations, 'artworks': me.getValue(mp.get(catalog['artworksByNationality'], lt.firstElement(nations)['nation']))}
+
+
 # Funciones de ordenamiento
 
 def compareDates(artwork1, artwork2):
@@ -256,5 +297,5 @@ def compareDates(artwork1, artwork2):
 def compareNames(artist1, artist2):
   return artist1['DisplayName'] < artist2['DisplayName']
 
-def compareCount(medium1, medium2):
-  return medium1['count'] > medium2['count']
+def compareCount(elem1, elem2):
+  return elem1['count'] > elem2['count']

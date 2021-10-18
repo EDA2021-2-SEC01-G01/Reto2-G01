@@ -84,5 +84,20 @@ def artistId(catalog, name):
   return model.artistIdByName(catalog, name)
 
 
+def getListOfNames(catalog, artwork):
+  listFromStr = artwork['ConstituentID'][1:-1].replace(' ', '').split(',')
+
+  namesList = []
+
+  for id in listFromStr:
+    namesList.append(model.getNameFromId(catalog, id))
+
+  return namesList
+
+
 def getArtworksFromArtistByMediums(artworks, medium):
   return model.getArtworksByMedium(artworks, medium)
+
+
+def getNationsByArtworks(catalog):
+  return model.getSortedNationsByArtworks(catalog)

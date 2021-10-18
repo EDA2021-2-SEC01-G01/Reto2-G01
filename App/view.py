@@ -181,12 +181,61 @@ def getMediumsAndArtworks(catalog):
     print(' URL:', (artwork['URL'] or 'Unknown'))
     print('\n-----------------------------------')
 
+# REQ. 4
+
+def getNationsByArtworks(catalog):
+  info = controller.getNationsByArtworks(catalog)
+
+  print('Nationality | Count')
+  for nation in lt.iterator(lt.subList(info['nations'], 1, 10)):
+    print('\n', nation['nation'] + ':', nation['count'])
+    print('\n---------------------------------')
+
+  firstElement = lt.firstElement(info['nations'])
+  print('The TOP nationality in the museum is:', firstElement['nation'], 'with', firstElement['count'], 'unique pieces.')
+  print('The first and last 3 objects in', firstElement['nation'], 'artwork list are:')
+
+  for artwork in lt.iterator(lt.subList(info['artworks']['artworks'], 1, 3)):
+    print('\n')
+    print('ObjectID:', artwork['ObjectID'])
+    print('Title:', artwork['Title'])
+    print('ArtistsNames:')
+    for name in controller.getListOfNames(catalog, artwork):
+      print('\t*', name)
+    print('\nMedium:', artwork['Medium'])
+    print('Date:', artwork['Date'])
+    print('Dimensions:', artwork['Dimensions'])
+    print('Department:', artwork['Department'])
+    print('Classification:', artwork['Classification'])
+    print('URL:', artwork['URL'])
+    print('\n-------------------------')
+
+
+  print('-------------------------')
+
+  for artwork in lt.iterator(lt.subList(info['artworks']['artworks'], lt.size(info['artworks']['artworks']) - 3, 3)):
+    print('\n')
+    print('ObjectID:', artwork['ObjectID'])
+    print('Title:', artwork['Title'])
+    print('ArtistsNames:')
+    for name in controller.getListOfNames(catalog, artwork):
+      print('\t*', name)
+    print('\nMedium:', artwork['Medium'])
+    print('Date:', artwork['Date'])
+    print('Dimensions:', artwork['Dimensions'])
+    print('Department:', artwork['Department'])
+    print('Classification:', artwork['Classification'])
+    print('URL:', artwork['URL'])
+    print('\n-------------------------')
+
+
 def printMenu():
   print("Bienvenido")
   print("1- Cargar información en el catálogo")
   print("2- Listar cronológicamente los artistas")
   print("3- Listar cronológicamente las adquisiciones")
   print("4- Clasificar las obras de un artista por técnica")
+  print("5- Clasificar las obras por nacionalidad de sus creadores")
   print("Otro- Salir")
 
 catalog = None
@@ -207,6 +256,8 @@ while True:
     sortArtworksByDates(catalog)
   elif int(inputs[0]) == 4:
     getMediumsAndArtworks(catalog)
+  elif int(inputs[0]) == 5:
+    getNationsByArtworks(catalog)
   else:
     sys.exit(0)
 sys.exit(0)
