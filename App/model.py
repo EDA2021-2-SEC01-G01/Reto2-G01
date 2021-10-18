@@ -40,12 +40,7 @@ los mismos.
 # Construccion de modelos
 
 def newCatalog():
-  catalog = {
-    'artists': None,
-    'artists': None,
-    'artworks': None,
-    'artworks': None,
-  }
+  catalog = {}
   
 
   catalog['artists'] = mp.newMap(15500, maptype='CHAINING', loadfactor=1.5)
@@ -61,6 +56,8 @@ def newCatalog():
   catalog['artworksByDate'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
 
   catalog['artworksByArtist'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
+
+  catalog['artworksByNationality'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
 
   return catalog
 
@@ -121,6 +118,7 @@ def addArtwork(catalog, artwork):
       artistValue = newArtist(artist)
       lt.addLast(artistValue['artworks'], artwork)
       mp.put(catalog['artworksByArtist'], artist, artistValue)
+
 
 # Funciones para creacion de datos
 
