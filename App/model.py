@@ -58,6 +58,10 @@ def newCatalog():
 
   catalog['artworksByNationality'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
 
+  catalog['artworksByDepartment'] = mp.newMap(maptype='CHAINING', loadfactor=2.0)
+
+  catalog['pricesOfArtworks'] = mp.newMap(15100, maptype='CHAINING', loadfactor=2.0)
+
   return catalog
 
 # Añadir informacion al catalogo
@@ -133,8 +137,32 @@ def addArtwork(catalog, artwork):
       nationValue = newNation(artist['Nationality'] or 'Nationality unknown')
       lt.addLast(nationValue['artworks'], artwork)
       mp.put(catalog['artworksByNationality'], artist['Nationality'] or 'Nationality unknown', nationValue)
+  
+  #Artworks by department
+  if artwork["Department"] == "":
+    artwork["Department"] = "Unknown"
+
+  existDepartment = mp.contains(catalog["artworksByDepartment"], artwork["Department"])
+
+  if existDepartment:
+    entry = mp.get(catalog["artworksByDepartment"], artwork["Department"])
+    artworks = me.getValue(entry)
+    lt.addLast(artworks["artworks"], artwork)
+  else:
+    entry = newDepartment(artwork["Department"])
+    lt.addLast(entry["artworks"], artwork)
+    mp.put(catalog["artworksByDepartment"], artwork["Department"], entry)
+
 
 # Funciones para creacion de datos
+
+def newDepartment(department):
+  department = {
+    "department": department,
+    "artworks": lt.newList("ARRAY_LIST")
+  }
+
+  return department
 
 def newNation(nation):
   nation = {
@@ -173,6 +201,26 @@ def newArtist(artist):
   return artist
 
 # Funciones de consulta
+
+def calculatePrice(catalog,department):
+  artworks = mp.get(catalog["artworksByDepartment"], department)
+  artworks = me.getValue(artworks)
+  aproximateWeight = 0
+  aproximateCost = 0
+
+
+def getPrices(artwork):
+  weight = artwork["Weight (kg)"].replace(" ", "")
+  height = artwork["Height (kg)"].replace(" ", "")
+  width = artwork["Width (kg)"].replace(" ", "")
+  length = artwork["Length (cm)"].replace(" ", "")
+
+  areaWeight = 0
+
+  if weight != "":
+    weight = float(weight)
+    
+    
 
 def getNameFromId(catalog, id):
   return me.getValue(mp.get(catalog['artists'], id))['DisplayName']
@@ -287,6 +335,9 @@ def getSortedNationsByArtworks(catalog):
   sa.sort(nations, compareCount)
 
   return {'nations': nations, 'artworks': me.getValue(mp.get(catalog['artworksByNationality'], lt.firstElement(nations)['nation']))}
+
+def transportArtworks(catalog, department):
+  pass
 
 
 # Funciones de ordenamiento

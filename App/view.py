@@ -250,6 +250,7 @@ while True:
     print("Cargando información de los archivos ....")
     catalog = initCatalog()
     catalog = loadData(catalog)
+    print(catalog)
   elif int(inputs[0]) == 2:
     sortArtistsByYears(catalog)
   elif int(inputs[0]) == 3:
