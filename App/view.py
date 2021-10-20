@@ -111,7 +111,7 @@ def sortArtworksByDates(catalog):
 
   print('\n There are', lt.size(artworks), 'artworks acquired between', beginYear, 'and', endYear)
   print('\n With', artworksInfo[2], 'different artists and purchased', artworksInfo[1], 'of them.')
-  print('\n The first and last 3 artists in range are...')
+  print('\n The first and last 3 artworks in range are...')
 
   print('\n-----------------------------------------------------------------')
 
@@ -250,7 +250,6 @@ while True:
     print("Cargando información de los archivos ....")
     catalog = initCatalog()
     catalog = loadData(catalog)
-    print(catalog)
   elif int(inputs[0]) == 2:
     sortArtistsByYears(catalog)
   elif int(inputs[0]) == 3:
