@@ -60,6 +60,9 @@ def sortMediums(artworks):
 
 # Funciones de consulta sobre el catálogo
 
+def calculatePrice(catalog, department):
+  return model.calculatePrice(catalog,department)
+
 def getSortedArtistsBetweenYears(catalog, beginDate, endDate):
   artistList = model.artistsBeetweenYears(catalog, beginDate, endDate)
   return artistList

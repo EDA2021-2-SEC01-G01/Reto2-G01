@@ -20,6 +20,7 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
+from typing import Callable
 import config as cf
 import sys
 import controller
@@ -228,6 +229,48 @@ def getNationsByArtworks(catalog):
     print('URL:', artwork['URL'])
     print('\n-------------------------')
 
+#Req 5
+
+def calculatePrice(catalog):
+  department = input("Ingrese el departamento sobre el cual se hará la consulta: ")
+  prices = controller.calculatePrice(catalog,department)
+  print("\nThe MoMA is going to transport "+str(prices["size"])+" artifacts from the department "+department)
+  print("REMEMBER!: NOT all MoMA data is complete!!!.... These are estimates")
+  print("Estimated cargo weight (Kg): "+str(prices["totalWeight"]))
+  print("Estimated cargo cost (USD): "+str(round(prices["totalCost"],3)))
+  print("\n The TOP 5 most expensive items to transport are: \n")
+
+  for artwork in lt.iterator(prices["5MostExpensive"]):
+    print("\n-----------------------------")
+    print("ObjectID: "+artwork["ObjectID"])
+    print("Title: "+artwork["Title"])
+    print("ArtistsNames: ")
+    for name in controller.getListOfNames(catalog, artwork):
+      print('\t*', name)
+    print("Medium: "+artwork["Medium"])
+    print("Date: "+artwork["Date"])
+    print("Dimensions: "+artwork["Dimensions"])
+    print("Clasification: "+artwork["Classification"])
+    print("TransCost (USD): "+str(artwork["TransCost (USD)"]))
+    print("URL: "+artwork["URL"]+"\n")
+  
+  print("\n The TOP 5 oldest items to transport are: \n")
+
+  for artwork in lt.iterator(prices["5Older"]):
+    print("\n-----------------------------")
+    print("ObjectID: "+artwork["ObjectID"])
+    print("Title: "+artwork["Title"])
+    print("ArtistsNames: ")
+    for name in controller.getListOfNames(catalog, artwork):
+      print('\t*', name)
+    print("Medium: "+artwork["Medium"])
+    print("Date: "+artwork["Date"])
+    print("Dimensions: "+artwork["Dimensions"])
+    print("Clasification: "+artwork["Classification"])
+    print("TransCost (USD): "+str(artwork["TransCost (USD)"]))
+    print("URL: "+artwork["URL"]+"\n")
+  
+
 
 def printMenu():
   print("Bienvenido")
@@ -236,6 +279,7 @@ def printMenu():
   print("3- Listar cronológicamente las adquisiciones")
   print("4- Clasificar las obras de un artista por técnica")
   print("5- Clasificar las obras por nacionalidad de sus creadores")
+  print("6- Transportar obras de un departamento")
   print("Otro- Salir")
 
 catalog = None
@@ -258,6 +302,8 @@ while True:
     getMediumsAndArtworks(catalog)
   elif int(inputs[0]) == 5:
     getNationsByArtworks(catalog)
+  elif int(inputs[0]) == 6:
+    calculatePrice(catalog)
   else:
     sys.exit(0)
 sys.exit(0)

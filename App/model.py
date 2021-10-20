@@ -58,7 +58,7 @@ def newCatalog():
 
   catalog['artworksByNationality'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
 
-  catalog['artworksByDepartment'] = mp.newMap(maptype='CHAINING', loadfactor=2.0)
+  catalog['artworksByDepartment'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
 
   catalog['pricesOfArtworks'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
 
@@ -211,20 +211,26 @@ def newArtist(artist):
 def calculatePrice(catalog,department):
   artworks = mp.get(catalog["artworksByDepartment"], department)
   artworks = me.getValue(artworks)
+  info = {}
   aproximateWeight = 0
-  costOfArtworks = mp.newMap(maptype='CHAINING', loadfactor=2.0)
+  aproximateCost = 0
+  size = lt.size(artworks["artworks"])
 
-  for artwork in artworks:
-    if artwork["Weight (kg)"].replace(" ", "") != "":
+  for artwork in lt.iterator(artworks["artworks"]):
+    if artwork["Weight (kg)"] != "":
       aproximateWeight += float(artwork["Weight (kg)"].replace(" ", ""))
     price = getPrices(artwork)
-    mp.put(costOfArtworks,artwork,price)
+    price = round(price,3)
+    artwork["TransCost (USD)"] = price
+    aproximateCost += price
   
-  aproximateCost = sum(lt.iterator(mp.valueSet(costOfArtworks)))
-  mp.put(costOfArtworks, "totalPrice",aproximateCost)
-  mp.put(costOfArtworks, "totalWeight", aproximateWeight)
+  info["totalCost"] = aproximateCost
+  info["totalWeight"] = aproximateWeight
+  info["size"] = size
+  info["5MostExpensive"] = mostExpensive(artworks["artworks"])
+  info["5Older"] = oldest(artworks["artworks"])
 
-  return costOfArtworks
+  return info
 
 
 def getPrices(artwork):
@@ -265,7 +271,14 @@ def getPrices(artwork):
 
   return valueKgM2M3
     
-    
+def mostExpensive(artworks):
+  sa.sort(artworks,comparePrice)
+  return lt.subList(artworks,1,5)
+  
+
+def oldest(artwoks):
+  sa.sort(artwoks,compareDates2)
+  return lt.subList(artwoks,1,5)
 
 def getNameFromId(catalog, id):
   return me.getValue(mp.get(catalog['artists'], id))['DisplayName']
@@ -392,3 +405,13 @@ def compareNames(artist1, artist2):
 
 def compareCount(elem1, elem2):
   return elem1['count'] > elem2['count']
+
+def comparePrice(artwork1, artwork2):
+  return artwork1["TransCost (USD)"] > artwork2["TransCost (USD)"]
+
+def compareDates2(artwork1,artwork2):
+  if artwork1["Date"] == "":
+      artwork1["Date"] = "2020"
+  if artwork2["Date"] == "":
+      artwork2["Date"] = "2020"
+  return artwork1["Date"] < artwork2["Date"]
