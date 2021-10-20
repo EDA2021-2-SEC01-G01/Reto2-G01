@@ -25,7 +25,6 @@
  """
 
 import config as cf
-from datetime import datetime as dt
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
@@ -60,7 +59,7 @@ def newCatalog():
 
   catalog['artworksByDepartment'] = mp.newMap(maptype='CHAINING', loadfactor=2.0)
 
-  catalog['pricesOfArtworks'] = mp.newMap(15100, maptype='CHAINING', loadfactor=2.0)
+  catalog['pricesOfArtworks'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
 
   return catalog
 
@@ -89,9 +88,9 @@ def addArtwork(catalog, artwork):
   # Artworks by date
 
   if artwork['DateAcquired']:
-    dateObject = dt.strptime(artwork['DateAcquired'], '%Y-%m-%d')
+    dateObject = numberFromDate(artwork['DateAcquired'])
   else:
-    dateObject = 'Unknown'
+    dateObject = 0
 
   dateStringCode = dateObject
 
@@ -139,6 +138,7 @@ def addArtwork(catalog, artwork):
       mp.put(catalog['artworksByNationality'], artist['Nationality'] or 'Nationality unknown', nationValue)
   
   #Artworks by department
+  
   if artwork["Department"] == "":
     artwork["Department"] = "Unknown"
 
@@ -163,6 +163,11 @@ def newDepartment(department):
   }
 
   return department
+
+
+def numberFromDate(date):
+  return int(date.replace('-', ''))
+
 
 def newNation(nation):
   nation = {
@@ -225,6 +230,7 @@ def getPrices(artwork):
 def getNameFromId(catalog, id):
   return me.getValue(mp.get(catalog['artists'], id))['DisplayName']
 
+
 def artistsBeetweenYears(catalog, begin, end):
   artists = lt.newList('ARRAY_LIST')
 
@@ -253,25 +259,25 @@ def artworksBeetweenDate(catalog, begin, end):
 
   artworksByDate = catalog['artworksByDate']
 
-  keys = mp.keySet(artworksByDate)
+  interationDate = numberFromDate(begin)
 
-  for key in lt.iterator(keys):
-    if key != 'Unknown':
-      if dt.strptime(begin, '%Y-%m-%d') <= key and key <= dt.strptime(end, '%Y-%m-%d'):
-        entry = mp.get(artworksByDate, key)
-        value = me.getValue(entry)['artworks']
+  while numberFromDate(begin) <= interationDate and interationDate <= numberFromDate(end):
+    if mp.contains(artworksByDate, interationDate):
+      entry = mp.get(artworksByDate, interationDate)
+      value = me.getValue(entry)['artworks']
 
-        for atwork in lt.iterator(value):
-          if 'purchase' in atwork['CreditLine'].lower():
-            purchased += 1
-          artistsIds = atwork['ConstituentID'][1:-1].replace(' ', '').split(',')
-          atwork['ConstituentID'] = lt.newList('ARRAY_LIST')
-          for id in artistsIds:
-            if mp.contains(catalog['artists'], id):
-              nArtists += 1
-              lt.addLast(atwork['ConstituentID'], me.getValue(mp.get(catalog['artists'], id))['DisplayName'])
+      for artwork in lt.iterator(value):
+        if 'purchase' in artwork['CreditLine'].lower():
+          purchased += 1
+        artistsIds = artwork['ConstituentID'][1:-1].replace(' ', '').split(',')
+        artwork['ConstituentID'] = lt.newList('ARRAY_LIST')
+        for id in artistsIds:
+          nArtists += 1
+          lt.addLast(artwork['ConstituentID'], me.getValue(mp.get(catalog['artists'], id))['DisplayName'])
 
-          lt.addLast(artworks, atwork)
+        lt.addLast(artworks, artwork)
+
+    interationDate += 1
 
   sa.sort(artworks, compareDates)
   return {'artworks': artworks, 'purchased': purchased, 'nArtists': nArtists}
@@ -343,7 +349,7 @@ def transportArtworks(catalog, department):
 # Funciones de ordenamiento
 
 def compareDates(artwork1, artwork2):
-  return dt.strptime(artwork1['DateAcquired'], '%Y-%m-%d') < dt.strptime(artwork2['DateAcquired'], '%Y-%m-%d')
+  return numberFromDate(artwork1['DateAcquired']) < numberFromDate(artwork2['DateAcquired'])
 
 def compareNames(artist1, artist2):
   return artist1['DisplayName'] < artist2['DisplayName']
