@@ -24,6 +24,7 @@
  * Dario Correal - Version inicial
  """
 
+from math import cos
 import config as cf
 from datetime import datetime as dt
 from DISClib.ADT import list as lt
@@ -206,19 +207,58 @@ def calculatePrice(catalog,department):
   artworks = mp.get(catalog["artworksByDepartment"], department)
   artworks = me.getValue(artworks)
   aproximateWeight = 0
-  aproximateCost = 0
+  costOfArtworks = mp.newMap(maptype='CHAINING', loadfactor=2.0)
+
+  for artwork in artworks:
+    if artwork["Weight (kg)"].replace(" ", "") != "":
+      aproximateWeight += float(artwork["Weight (kg)"].replace(" ", ""))
+    price = getPrices(artwork)
+    mp.put(costOfArtworks,artwork,price)
+  
+  aproximateCost = sum(lt.iterator(mp.valueSet(costOfArtworks)))
+  mp.put(costOfArtworks, "totalPrice",aproximateCost)
+  mp.put(costOfArtworks, "totalWeight", aproximateWeight)
+
+  return costOfArtworks
 
 
 def getPrices(artwork):
-  weight = artwork["Weight (kg)"].replace(" ", "")
-  height = artwork["Height (kg)"].replace(" ", "")
-  width = artwork["Width (kg)"].replace(" ", "")
-  length = artwork["Length (cm)"].replace(" ", "")
+  weight = artwork['Weight (kg)'].replace(' ', '')
+  height = artwork['Height (cm)'].replace(' ', '')
+  width = artwork['Width (cm)'].replace(' ', '')
+  length = artwork['Length (cm)'].replace(' ', '')
 
-  areaWeight = 0
+  valueKgM2M3 = 0
 
-  if weight != "":
+  if (weight != ''):
     weight = float(weight)
+    if weight * 72 > valueKgM2M3:
+      valueKgM2M3 = weight * 72
+
+  if height != '' and width != '' and length != '':
+    m3 = (float(height) * float(width) * float(length))/10000
+    if m3 * 72 > valueKgM2M3:
+      valueKgM2M3 = m3 * 72
+  
+  elif height != '' and width != '':
+    m2 = (float(height) * float(width)) / 10000
+    if m2 * 72 > valueKgM2M3:
+      valueKgM2M3 = m2 * 72
+  
+  elif height != '' and length != '':
+    m2 = (float(height) * float(length)) / 10000
+    if m2 * 72 > valueKgM2M3:
+      valueKgM2M3 = m2 * 72
+  
+  elif width != '' and length != '':
+    m2 = (float(width) * float(length)) / 10000
+    if m2 * 72 > valueKgM2M3:
+      valueKgM2M3 = m2 * 72
+  
+  if valueKgM2M3 == 0:
+    valueKgM2M3 = 48
+
+  return valueKgM2M3
     
     
 
@@ -335,10 +375,6 @@ def getSortedNationsByArtworks(catalog):
   sa.sort(nations, compareCount)
 
   return {'nations': nations, 'artworks': me.getValue(mp.get(catalog['artworksByNationality'], lt.firstElement(nations)['nation']))}
-
-def transportArtworks(catalog, department):
-  pass
-
 
 # Funciones de ordenamiento
 
