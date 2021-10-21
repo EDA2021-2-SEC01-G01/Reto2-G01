@@ -24,12 +24,11 @@
  * Dario Correal - Version inicial
  """
 
-from math import cos
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
-from DISClib.Algorithms.Sorting import shellsort as sa
+from DISClib.Algorithms.Sorting import mergesort as ms
 assert cf
 
 """
@@ -206,9 +205,6 @@ def newArtist(artist):
 
 # Funciones de consulta
 
-def mostProlificArtists(catalog,amount):
-  pass
-
 def calculatePrice(catalog,department):
   artworks = mp.get(catalog["artworksByDepartment"], department)
   artworks = me.getValue(artworks)
@@ -271,14 +267,16 @@ def getPrices(artwork):
 
   return valueKgM2M3
     
+
 def mostExpensive(artworks):
-  sa.sort(artworks,comparePrice)
-  return lt.subList(artworks,1,5)
-  
+  ms.sort(artworks, comparePrice)
+  return lt.subList(artworks, 1, 5)
+
 
 def oldest(artwoks):
-  sa.sort(artwoks,compareDates2)
-  return lt.subList(artwoks,1,5)
+  ms.sort(artwoks, compareArtworksYears)
+  return lt.subList(artwoks, 1, 5)
+
 
 def getNameFromId(catalog, id):
   return me.getValue(mp.get(catalog['artists'], id))['DisplayName']
@@ -296,7 +294,7 @@ def artistsBeetweenYears(catalog, begin, end):
 
     if entry:
       value = me.getValue(entry)
-      sa.sort(value['artists'], compareNames)
+      ms.sort(value['artists'], compareNames)
       for artist in lt.iterator(value['artists']):
         lt.addLast(artists, artist)
     
@@ -332,12 +330,13 @@ def artworksBeetweenDate(catalog, begin, end):
 
     interationDate += 1
 
-  sa.sort(artworks, compareDates)
+  ms.sort(artworks, compareDates)
   return {'artworks': artworks, 'purchased': purchased, 'nArtists': nArtists}
 
 
 def artistIdByName(catalog, name):
   entry = mp.get(catalog['artistsIdsByName'], name)
+
   if not entry:
     return None
   value = me.getValue(entry)
@@ -368,7 +367,7 @@ def topMediumsByArtworks(artworks):
   for key in mediums:
     lt.addLast(mediumsList, mediums[key])
 
-  sa.sort(mediumsList, compareCount)
+  ms.sort(mediumsList, compareCount)
   return mediumsList
 
 
@@ -391,7 +390,7 @@ def getSortedNationsByArtworks(catalog):
     value = me.getValue(entry)['artworks']
     lt.addLast(nations, {'nation': key, 'count': lt.size(value)})
 
-  sa.sort(nations, compareCount)
+  ms.sort(nations, compareCount)
 
   return {'nations': nations, 'artworks': me.getValue(mp.get(catalog['artworksByNationality'], lt.firstElement(nations)['nation']))}
 
@@ -409,9 +408,9 @@ def compareCount(elem1, elem2):
 def comparePrice(artwork1, artwork2):
   return artwork1["TransCost (USD)"] > artwork2["TransCost (USD)"]
 
-def compareDates2(artwork1,artwork2):
+def compareArtworksYears(artwork1,artwork2):
   if artwork1["Date"] == "":
-      artwork1["Date"] = "2020"
+    artwork1["Date"] = "2020"
   if artwork2["Date"] == "":
-      artwork2["Date"] = "2020"
+    artwork2["Date"] = "2020"
   return artwork1["Date"] < artwork2["Date"]

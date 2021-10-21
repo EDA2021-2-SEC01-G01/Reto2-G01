@@ -20,7 +20,6 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
-from typing import Callable
 import config as cf
 import sys
 import controller
@@ -41,19 +40,31 @@ def initCatalog():
   return controller.newCatalog()
 
 def loadData(catalog):
-  file = input('Ingresa 1 para cargar los archivos grande: (Por defecto se utilizan los archivos de artistas y obras pequeños): ')
+  file = input('Ingresa un número del 1 al 6 para cargar los datos, el tamaño del archivo cargado será mayor según el numero que sea ingresado siendo 1 el archivo más pequeño y 6 el archivo más grande: (Por defecto se utilizan los archivos de artistas y obras pequeños): ')
 
-  if file == '':
+  if file == '1':
     artistas = 'Artists-utf8-small.csv'
     obras = 'Artworks-utf8-small.csv'
-  elif file == '1':
+  elif file == '2':
+    artistas = 'Artists-utf8-10pct.csv'
+    obras = 'Artworks-utf8-10pct.csv'
+  elif file == '3':
+    artistas = 'Artists-utf8-20pct.csv'
+    obras = 'Artworks-utf8-20pct.csv'
+  elif file == '4':
+    artistas = 'Artists-utf8-50pct.csv'
+    obras = 'Artworks-utf8-50pct.csv'
+  elif file == '5':
+    artistas = 'Artists-utf8-80pct.csv'
+    obras = 'Artworks-utf8-80pct.csv'
+  elif file == '6':
     artistas = 'Artists-utf8-large.csv'
     obras = 'Artworks-utf8-large.csv'
   else:
     artistas = 'Artists-utf8-small.csv'
     obras = 'Artworks-utf8-small.csv'
 
-  return controller.loadData(catalog, artistas, obras) 
+  return controller.loadData(catalog, artistas, obras)
 
 # REQ. 1
 
@@ -229,7 +240,7 @@ def getNationsByArtworks(catalog):
     print('URL:', artwork['URL'])
     print('\n-------------------------')
 
-#Req 5
+#REQ. 5
 
 def calculatePrice(catalog):
   department = input("Ingrese el departamento sobre el cual se hará la consulta: ")
