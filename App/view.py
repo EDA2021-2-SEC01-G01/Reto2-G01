@@ -269,8 +269,6 @@ def calculatePrice(catalog):
     print("Clasification: "+artwork["Classification"])
     print("TransCost (USD): "+str(artwork["TransCost (USD)"]))
     print("URL: "+artwork["URL"]+"\n")
-  
-
 
 def printMenu():
   print("Bienvenido")
@@ -295,15 +293,40 @@ while True:
     catalog = initCatalog()
     catalog = loadData(catalog)
   elif int(inputs[0]) == 2:
-    sortArtistsByYears(catalog)
+    if catalog == None:
+      print("Debe cargar los datos primero")
+      input("Presione enter para continuar...")
+    else:
+      sortArtistsByYears(catalog)
+      input("Presione enter para continuar...")
   elif int(inputs[0]) == 3:
-    sortArtworksByDates(catalog)
+    if catalog == None:
+      print("Debe cargar los datos primero")
+      input("Presione enter para continuar...")
+    else:
+      sortArtworksByDates(catalog)
+      input("Presione enter para continuar...")
   elif int(inputs[0]) == 4:
-    getMediumsAndArtworks(catalog)
+    if catalog == None:
+      print("Debe cargar los datos primero")
+      input("Presione enter para continuar...")
+    else:
+      getMediumsAndArtworks(catalog)
+      input("Presione enter para continuar...")
   elif int(inputs[0]) == 5:
-    getNationsByArtworks(catalog)
+    if catalog == None:
+      print("Debe cargar los datos primero")
+      input("Presione enter para continuar...")
+    else:
+      getNationsByArtworks(catalog)
+      input("Presione enter para continuar...")
   elif int(inputs[0]) == 6:
-    calculatePrice(catalog)
+    if catalog == None:
+      print("Debe cargar los datos primero")
+      input("Presione enter para continuar...")
+    else:
+      calculatePrice(catalog)
+      input("Presione enter para continuar...")
   else:
     sys.exit(0)
 sys.exit(0)

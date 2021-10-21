@@ -60,8 +60,6 @@ def newCatalog():
 
   catalog['artworksByDepartment'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
 
-  catalog['pricesOfArtworks'] = mp.newMap(151000, maptype='CHAINING', loadfactor=2.0)
-
   return catalog
 
 # Añadir informacion al catalogo
@@ -208,6 +206,9 @@ def newArtist(artist):
 
 # Funciones de consulta
 
+def mostProlificArtists(catalog,amount):
+  pass
+
 def calculatePrice(catalog,department):
   artworks = mp.get(catalog["artworksByDepartment"], department)
   artworks = me.getValue(artworks)
@@ -231,7 +232,6 @@ def calculatePrice(catalog,department):
   info["5Older"] = oldest(artworks["artworks"])
 
   return info
-
 
 def getPrices(artwork):
   weight = artwork['Weight (kg)'].replace(' ', '')
